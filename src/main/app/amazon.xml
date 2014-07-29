@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:context="http://www.springframework.org/schema/context" xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:s3="http://www.mulesoft.org/schema/mule/s3" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.5.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/s3 http://www.mulesoft.org/schema/mule/s3/current/mule-s3.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <s3:config name="Amazon_S3" accessKey="${s3.accessKey}" secretKey="${s3.secretKey}" doc:name="Amazon S3"/>
+    <context:property-placeholder location="common.properties"/>
+    <db:oracle-config name="Oracle_Configuration" host="${oracle.host}" port="1521" instance="${oracle.instance}" user="${oracle.user}" password="${oracle.password}" doc:name="Oracle Configuration"/>
+    <data-mapper:config name="CSV_To_Map" transformationGraphPath="csv_to_map.grf" doc:name="CSV_To_Map"/>
+    <flow name="amazonFlow1" doc:name="amazonFlow1">
+        <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8081" doc:name="Recieve HTTP requests"/>
+        <s3:get-object config-ref="Amazon_S3" bucketName="${s3.bucket}" key="${s3.filename}" doc:name="Get CSV file from S3"/>
+        <set-payload value="#[payload.getObjectContent()]" doc:name="Set Payload to File Content"/>
+        <file:file-to-string-transformer doc:name="Convert File to String"/>
+        <data-mapper:transform config-ref="CSV_To_Map" doc:name="CSV To Map"/>
+        <foreach doc:name="For Each">
+            <db:insert config-ref="Oracle_Configuration" doc:name="Insert into Database">
+                <db:dynamic-query><![CDATA[INSERT INTO "SYSTEM"."CUSTOMERS" (FIRST_NAME, LAST_NAME, PHONE_NUMBER) VALUES ('#[payload['firstname']]', '#[payload['lastname']]', '#[payload['phone']]')]]></db:dynamic-query>
+            </db:insert>
+        </foreach>
+        <byte-array-to-string-transformer doc:name="Convert Byte Array to String"/>
+        <logger message="XML content: #[payload]" level="INFO" doc:name="Log the converted XML"/>
+    </flow>
+</mule>
