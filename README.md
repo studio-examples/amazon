@@ -15,8 +15,6 @@ sid: db name from the oracle installation
  
 after installation run scr/main/resources/customers.sql script that creates a customers table. 
 
-edit commmon.properties to have correct connection parameters. 
-
 Step 6: run mule app
 Step 7: go to localhost:8081
 Step 8: the output contains an exception saying a certain library is missing. i could not get this fixed. i suspect there is a bug in Amazon connector as from the log i could figure out following: there is a last modified date of S3 objects in the specific format. the connector wants to parse it but expects it to be a little bit different. maybe this was fixed in some version i dont know.
@@ -27,4 +25,6 @@ Mon 14 Jul 2014 09:40:38 GMT
 this is the expected format:
 "EEE, dd MMM yyyy HH:mm:ss z"
 
-however the objects are inserted in oracle db. this can be verified by downloading oracle sql developer and connecting by the same connection parameters to the local instance and examining the customers table. 
+however the objects are inserted in oracle db. this can be verified by downloading oracle sql developer and connecting by the same connection parameters to the local instance and examining the customers table.
+
+ORACLE JDBC DRIVER NEEDS TO BE DOWNLOADED AND ADDED MANUALLY TO THE PROJECT BECAUSE OF THE LICENSNE. 

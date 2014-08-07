@@ -13,7 +13,6 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
     <s3:config name="Amazon_S3" accessKey="${s3.accessKey}" secretKey="${s3.secretKey}" doc:name="Amazon S3"/>
-    <context:property-placeholder location="common.properties"/>
     <db:oracle-config name="Oracle_Configuration" host="${oracle.host}" port="1521" instance="${oracle.instance}" user="${oracle.user}" password="${oracle.password}" doc:name="Oracle Configuration"/>
     <data-mapper:config name="CSV_To_Map" transformationGraphPath="csv_to_map.grf" doc:name="CSV_To_Map"/>
     <flow name="amazonFlow1" doc:name="amazonFlow1">
